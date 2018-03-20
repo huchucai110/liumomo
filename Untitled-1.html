@@ -26,12 +26,12 @@
         });
     function locate2(){
 	  	var   jingdu=dom.byId("jingdu").value;
-        var   weidu=dom.byId("weidu").value;
+                var   weidu=dom.byId("weidu").value;
 		var   chengji=dom.byId("chengji").value;
 		var   ditu=dom.byId("ditu").value;
-        var mypoint = new Point(jingdu, weidu);
-	      map.centerAt(mypoint);
-          map.setZoom(chengji);
+                var mypoint = new Point(jingdu, weidu);
+	        map.centerAt(mypoint);
+                map.setZoom(chengji);
 		  map.setBasemap(ditu);
         }
       });
