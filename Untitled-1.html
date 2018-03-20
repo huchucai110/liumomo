@@ -15,23 +15,25 @@
     <script src="https://js.arcgis.com/3.23/"></script>
     <script>
     var map;
-    var jingdu,weidu,chengji,ditu;   
+     
     function locate1(){
-      require([ "esri/map","esri/geometry/Point","dojo/domReady!"], function(Map,Point) {
+      require([ "esri/map","dojo/dom","dojo/on","esri/geometry/Point","dojo/domReady!"], function(Map,dom,on,Point) {
         map = new Map("map", {
+        on(dom.byId("shuaxin"), "click", locate2);
           //basemap: "topo",  //For full list of pre-defined basemaps, navigate to http://arcg.is/1JVo6Wd
           center: [-122.45, 37.75], // longitude, latitude
           zoom: 13
         });
-	 	 jingdu=document.getElementById("jingdu").value;
-                 weidu=document.getElementById("weidu").value;
-		 chengji=document.getElementById("chengji").value;
-		 ditu=document.getElementById("ditu").value;
-		 var mypoint = new Point(jingdu, weidu);
-	          map.centerAt(mypoint);
-                  map.setZoom(chengji);
+    function locate2(){
+	  	var   jingdu=dom.byId("jingdu").value;
+        var   weidu=dom.byId("weidu").value;
+		var   chengji=dom.byId("chengji").value;
+		var   ditu=dom.byId("ditu").value;
+        var mypoint = new Point(jingdu, weidu);
+	      map.centerAt(mypoint);
+          map.setZoom(chengji);
 		  map.setBasemap(ditu);
-          
+        }
       });
     }
      
@@ -41,6 +43,7 @@
 
  <body>
 <button id="xianshi" onclick="locate1()" >显示地图</button>
+<button id="shuaxin" >刷新</button>
 <input type="text" id="jingdu" value="" placeholder="输入经度" size="12">
 <input type="text" id="weidu" value="" placeholder="输入纬度" size="12">
 <input type="text" id="chengji" value="" placeholder="输入层级" size="12">
