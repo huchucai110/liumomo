@@ -18,8 +18,8 @@
      
     function locate1(){
       require([ "esri/map","dojo/dom","dojo/on","esri/geometry/Point","dojo/domReady!"], function(Map,dom,on,Point) {
-        map = new Map("map", {
         on(dom.byId("shuaxin"), "click", locate2);
+        map = new Map("map", {
           basemap: "topo",  //For full list of pre-defined basemaps, navigate to http://arcg.is/1JVo6Wd
           center: [-122.45, 37.75], // longitude, latitude
           zoom: 13
