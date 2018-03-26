@@ -3,7 +3,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
-    <title>Simple Map</title>
+    <title>Map</title>
     <link rel="stylesheet" href="https://js.arcgis.com/3.23/esri/css/esri.css">
     <style>
       html, body, #map {
@@ -12,43 +12,48 @@
         padding: 0;
       }
     </style>
+    
     <script src="https://js.arcgis.com/3.23/"></script>
     <script>
-    var map;
-     
-    function locate1(){
-      require([ "esri/map","dojo/dom","dojo/on","esri/geometry/Point","dojo/domReady!"], function(Map,dom,on,Point) {
-        on(dom.byId("shuaxin"), "click", locate2);
-        map = new Map("map", {
-          basemap: "topo",  //For full list of pre-defined basemaps, navigate to http://arcg.is/1JVo6Wd
-          center: [-122.45, 37.75], // longitude, latitude
-          zoom: 13
-        });
-    function locate2(){
-	  	var   jingdu=dom.byId("jingdu").value;
-                var   weidu=dom.byId("weidu").value;
-		var   chengji=dom.byId("chengji").value;
-		var   ditu=dom.byId("ditu").value;
-                var mypoint = new Point(jingdu, weidu);
-	        map.centerAt(mypoint);
-                map.setZoom(chengji);
-		  map.setBasemap(ditu);
-        }
+      var map;
+      var MapZoom;
+      var lon;
+      var lat;
+      var MapBasemap;
+      var MapPoint;
+     function ShowMap() 
+    {   
+      require(["esri/map","dojo/dom","dojo/on","esri/geometry/Point","dojo/domReady!"],
+    function(Map,dom,on,Point)
+   {
+     on(dom.byId("shuaxin"), "click",TOOLS);
+     map = new Map("map");
+     TOOLS();
+     function TOOLS() {   
+          MapZoom = document.getElementById("zoom").value;
+          lon = document.getElementById("jingdu").value;   
+          lat = document.getElementById("weidu").value;  
+          MapPoint = new Point(lon, lat);
+         var MapBasemap = document.getElementById("ditu").value;
+         map.setBasemap(MapBasemap);
+         map.setZoom(MapZoom);
+         map.centerAt(MapPoint);
+         
+         }
       });
     }
-     
-
     </script>
   </head>
 
- <body>
-<button id="xianshi" onclick="locate1()" >显示地图</button>
-<button id="shuaxin" >刷新</button>
-<input type="text" id="jingdu" value="" placeholder="输入经度" size="12">
-<input type="text" id="weidu" value="" placeholder="输入纬度" size="12">
-<input type="text" id="chengji" value="" placeholder="输入层级" size="12">
-<input type="text" id="ditu" value=""  placeholder="输入地图" size="12">
-<div id="map"></div> 
+  <body >
+  
+    
+    <input id="jingdu" type="text" value="" placeholder="请输入地图经度" />
+    <input id="weidu" type="text" value="" placeholder="请输入地图纬度" />
+    <input id="zoom" type="text" value="" placeholder="请输入缩放级别" />
+    <input id="ditu" type="text" value="" placeholder="请输入地图底图" />
+    <input type="button" id="xianshi" value="显示地图" class="submitButton" onclick="ShowMap()"  />
+    <input type="button" id="shuaxin" value="刷新地图" class="submitButton"   /> 
+    <div id="map"></div>
   </body>
 </html>
-
