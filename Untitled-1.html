@@ -1,59 +1,185 @@
-<!DOCTYPE html>
+
+
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
-    <title>Map</title>
+    <title>Simple Map</title>
     <link rel="stylesheet" href="https://js.arcgis.com/3.23/esri/css/esri.css">
+	 <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/1.6/js/dojo/dijit/themes/tundra/tundra.css">
     <style>
-      html, body, #map {
+      html, body{
         height: 100%;
         margin: 0;
         padding: 0;
       }
+	  .axis path,
+    .axis line{
+	fill: none;
+	stroke: black;
+	shape-rendering: crispEdges;
+}
+        #map
+        {
+            width: 600px;
+            height:600px;
+        }
+        #map2
+        {
+            position: absolute;
+            width: 600px;
+            height:600px;
+            left: 656px;
+            top: 23px;
+        }
+         #feedback {
+         background:#fff;
+         color: #444;
+         position: absolute;
+         font-family: arial;
+         height: 150px;
+         left: 30px;
+         margin: 5px;
+         padding: 10px;
+         top: 60px;
+         width: 150px;
+         <!-- z-index: 40; -->
+      }
+
+
+.axis text {
+	font-family: sans-serif;
+	font-size: 11px;
+}
     </style>
-    
     <script src="https://js.arcgis.com/3.23/"></script>
+	<!-- <script src="web.js"></script> -->
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>  
     <script>
       var map;
-      var MapZoom;
-      var lon;
-      var lat;
-      var MapBasemap;
-      var MapPoint;
-     function ShowMap() 
-    {   
-      require(["esri/map","dojo/dom","dojo/on","esri/geometry/Point","dojo/domReady!"],
-    function(Map,dom,on,Point)
-   {
-     on(dom.byId("shuaxin"), "click",TOOLS);
-     map = new Map("map");
-     TOOLS();
-     function TOOLS() {   
-          MapZoom = document.getElementById("zoom").value;
-          lon = document.getElementById("jingdu").value;   
-          lat = document.getElementById("weidu").value;  
-          MapPoint = new Point(lon, lat);
-         var MapBasemap = document.getElementById("ditu").value;
-         map.setBasemap(MapBasemap);
-         map.setZoom(MapZoom);
-         map.centerAt(MapPoint);
-         
+      var scale;
+	  var myid;
+      var dynamicMapServiceLayer,map,visible = [];
+      require(["esri/map","esri/geometry/webMercatorUtils", "esri/layers/ArcGISDynamicMapServiceLayer","esri/geometry/scaleUtils","dojo/on", "dojo/domReady!"], function(Map,webMercatorUtils, ArcGISDynamicMapServiceLayer,scaleUtils,on) {
+        map = new Map("map", {
+          basemap: "gray",  //For full list of pre-defined basemaps, navigate to http://arcg.is/1JVo6Wd
+          center: [-122.45, 37.75], // longitude, latitude
+          zoom: 13
+        });
+          map2 = new Map("map2", {
+          basemap: "osm",  
+          center: [-122.45, 37.75], // longitude, latitude
+          zoom: 13
+        });
+           map.on("load",function(event){
+           scale = scaleUtils.getScale(map);
+           document.getElementById("inputFileItemId").value = scale;
+		    //myid = dynamicMapServiceLayer.id;
+		    //alert(myid);	
+        });
+          map.on("extent-change",function(event){
+           scale = scaleUtils.getScale(map);
+           document.getElementById("inputFileItemId").value = scale;
+		    if(map2)
+              {
+                  map2.setExtent(event.extent);
+              }
+        });
+		
+             map.on("mouse-move",function(e){
+			 var mp = webMercatorUtils.webMercatorToGeographic(e.mapPoint);
+             document.getElementById("inputFile").value = mp.x + ","+ mp.y;
+			 
+        });
+		   dynamicMapServiceLayer = new ArcGISDynamicMapServiceLayer(
+                "http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StateCityHighway_USA/MapServer",{
+				
+           });
+            
+            if (dynamicMapServiceLayer.loaded)
+            {        
+                buildLayerList(dynamicMapServiceLayer);     
+            	   
+            }
+          else
+          {
+                dojo.connect(dynamicMapServiceLayer,"onLoad",buildLayerList);		
+          }  
+			dynamicMapServiceLayer.on("load",function(e){
+		    myid = e.layer.id;
+		    
+        });
+      });	     
+			function buildLayerList(layer) {
+            var infos = layer.layerInfos, info;
+            var items = [];
+            for (var i=0,j=infos.length;i<j;i++) {
+                info = infos[i];
+                if (info.defaultVisibility) {
+                    visible.push(info.id);
+                }
+                items[i] = "<input type='checkbox' class='list_item' checked='" + (info.defaultVisibility ? "checked" : "") + "' id='" + info.id +"' onclick='updateLayerVisibility();'/><label for='" +info.id+ "'>" +info.name+ "</label>";          
+            }
+            dojo.byId("layer_list").innerHTML = items.join();
+            
+            layer.setVisibleLayers(visible);
+            map.addLayer(layer);
+        
+        }
+		
+		
+	        function updateLayerVisibility() {
+            var inputs = dojo.query(".list_item"), input;
+            visible = [];
+            for (var i=0,j=inputs.length;i<j;i++) {
+                if(inputs[i].checked) {
+                    visible.push(inputs[i].id);
+                }           
+            }
+            dynamicMapServiceLayer.setVisibleLayers(visible);
+        
+        }
+		 function deleteLayer() {
+          map.removeLayer(dynamicMapServiceLayer);
+		  dojo.byId("layer_list").innerHTML = "";
+        }
+		 function addLayer() {
+           buildLayerList(dynamicMapServiceLayer); 
+		  
+        }
+		
+	    function choose_basemap() {
+             var objs = document.getElementById("basemapsec");
+             var index = objs.selectedIndex;
+             basemap1 = objs.options[index].value;
+             map.setBasemap(basemap1);
          }
-      });
-    }
+
     </script>
   </head>
-
-  <body >
-  
-    
-    <input id="jingdu" type="text" value="" placeholder="请输入地图经度" />
-    <input id="weidu" type="text" value="" placeholder="请输入地图纬度" />
-    <input id="zoom" type="text" value="" placeholder="请输入缩放级别" />
-    <input id="ditu" type="text" value="" placeholder="请输入地图底图" />
-    <input type="button" id="xianshi" value="显示地图" class="submitButton" onclick="ShowMap()"  />
-    <input type="button" id="shuaxin" value="刷新地图" class="submitButton"   /> 
-    <div id="map"></div>
+  <body>
+      <select id ="basemapsec" title="地图风格" >
+        <option value="topo">topo</option>
+        <option value="oceans">oceans</option>
+        <option value="osm">osm</option>
+        <option value="gray">gray</option>
+        <option value="satellite">satellite</option>
+        <option value="hybrid">hybrid</option>
+        <option value="national-geographic">national-geographic</option>
+    </select>
+       <input type='button' value='切换底图' onClick="choose_basemap()"/>
+      <label for="dashboardFieldNamesCombo">比例尺:</label> 
+    <input type="text" id="inputFileItemId" style="width:275px" />
+    <label for="dashboardField">当前地理坐标:</label> 
+    <input type="text" id="inputFile" style="width:275px" />
+    <div id="map"  style="position: relative; width: 50%; height: 90%;"></div>
+    <div id="map2"></div>
+	    <div id="feedback" class="shadow">
+               <div><strong>Add Map Layers</strong></div>            
+               <div id="layer_list"></div>
+     <button id="delyer" onclick="deleteLayer()" >删除</button>
+	  <button id="adlyer" onclick="addLayer()" >添加</button>
+         </div>
+	<!-- <div id="kid3"></div> -->
   </body>
 </html>
