@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>人口图</title>
+    <script src="https://code.jquery.com/jquery-1.7.2.min.js"></script>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.23/esri/css/esri.css">
+    <style>
+        html,
+        body,
+        #map {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script src="https://js.arcgis.com/3.23/"></script>
+    <script>
+        var map;
+        require([
+            "esri/map", "esri/layers/FeatureLayer",
+            "esri/InfoTemplate", "esri/symbols/SimpleFillSymbol",
+            "esri/renderers/SimpleRenderer","esri/symbols/SimpleMarkerSymbol",
+            "esri/symbols/SimpleLineSymbol", "esri/Color", "esri/layers/GraphicsLayer", "esri/graphic", "dojo/dom-style", "dojo/domReady!"
+        ], function(
+            Map, FeatureLayer,
+            InfoTemplate, SimpleFillSymbol,
+            SimpleRenderer, SimpleMarkerSymbol,
+            SimpleLineSymbol, Color, GraphicsLayer, Graphic
+        ) {
+            //加载地图
+            map = new Map("map", {
+                basemap: "osm",
+                center: [105, 34],
+                zoom: 5
+            });
+            //定义图层
+            var gLayer;
+            gLayer = new GraphicsLayer();
+            //定义渲染器
+            var renderer;
+            //定义渲染器开关
+            var  a = 1;
+            $(function() {
+                $("#render").click(function() {
+                    //将json文件赋给图层
+                    $.get("https://huchucai110.github.io/liumomo/jsonhu.json", null, function(result) {
+                        var features = result.features;
+                        for (var i = 0; i < features.length; i++) {
+                            var feature = features[i];
+                            var graphic = new Graphic(feature);
+                            gLayer.add(graphic);
+                        }
+                    });
+                    //渲染方式1-SimpleRenderer
+                    if (a == 1) {
+                        if (gLayer != null) {
+                            map.removeLayer(gLayer);
+                        }
+                        renderer = new SimpleRenderer(new SimpleFillSymbol().setOutline(new SimpleLineSymbol().setWidth(0.1).setColor(new Color([128, 128, 128]))));
+                        renderer.setColorInfo({
+                            field: "POPU",
+                            minDataValue: 0,
+                            maxDataValue: 10000,
+                            colors: [
+                                new Color([255, 255, 255]),
+                                new Color([0,150,150])
+                            ]
+                        });
+                        a = 2;
+                    }
+                    //渲染方式2-SimpleRenderer
+                    else
+                    {
+                        map.removeLayer(gLayer);
+                        var blue = new Color([0, 0, 230, 0.5]);
+                        var renderer = new SimpleRenderer(new SimpleMarkerSymbol("solid", 10, null, blue));
+                        renderer.setSizeInfo({
+                            field:"POPU",
+                            minSize:3,
+                            maxSize:45,
+                            minDataValue:0,
+                            maxDataValue:12000
+                        });
+                        gLayer.renderer= renderer;
+                        a=1;
+                    }
+                    //信息框
+                    var infoTemplate = new InfoTemplate("${NAME}", "${*}");
+                    gLayer.setInfoTemplate(infoTemplate);
+                    //加载渲染器到图层
+                    gLayer.setRenderer(renderer);
+                    map.addLayer(gLayer);
+                });
+            });
+        });
+    </script>
+</head>
+    
+<body>
+<div id="map"></div>
+    <div style="position: absolute;top:0.1%;left:94.7%;background: white;">
+    <button id="render">点击切换渲染方式</button>
+</div>
+</body>
+
+</html>
