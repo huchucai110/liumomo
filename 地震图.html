@@ -45,15 +45,14 @@
           //添加数据图层
           function addCSV(style){
         	csv = new CSVLayer("https://huchucai110.github.io/liumomo/all_month2.csv",{id:"csv"} );
-            csv2 = new CSVLayer("https://huchucai110.github.io/liumomo/all_month2.csv",{id:"csv"} );
             //信息框
             var template = new InfoTemplate("${type}", "${place}");
             csv.setInfoTemplate(template);
         	//定义标记符号
-	        var symbol = new SimpleMarkerSymbol();
-	        symbol.setColor(new Color([150, 150, 150, 0.5]));
+	        var symbol0 = new SimpleMarkerSymbol();
+	        symbol0.setColor(new Color([150, 150, 150, 0.5]));
 	        //定义唯一值渲染器，symbol是默认的渲染符号
-	        var renderer = new ClassBreaksRenderer(symbol, "depth");
+	        var renderer = new ClassBreaksRenderer(symbol0, "depth");
 	        //定义热度图
             var heatmapRenderer = new HeatmapRenderer(
                 {
@@ -81,15 +80,14 @@
 	        //heatmapRendere
 	        else
             {
-                csv2.setRenderer(heatmapRenderer);
                 var orangeRed = new Color([	125,0,0, 0.7]);
                 symbol = new SimpleMarkerSymbol(new SimpleMarkerSymbol("solid", 8, null, orangeRed));
                 symbol2 = new SimpleMarkerSymbol(new SimpleMarkerSymbol("solid", 18, null, orangeRed));
                 symbol3 = new SimpleMarkerSymbol(new SimpleMarkerSymbol("solid", 28, null, orangeRed));
                 symbol4 = new SimpleMarkerSymbol(new SimpleMarkerSymbol("solid", 38, null, orangeRed));
                 symbol5 = new SimpleMarkerSymbol(new SimpleMarkerSymbol("solid", 48, null, orangeRed));
-                csv2.setRenderer(heatmapRenderer);
-                map.addLayer(csv2);
+                csv.setRenderer(heatmapRenderer);
+                map.addLayer(csv);
             }
         }
           //切换可视化地图
